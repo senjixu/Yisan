@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"	
+	xsi:schemaLocation=" 
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context-3.0.xsd
+            http://www.springframework.org/schema/task  
+            http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+ 
+ 
+ 	<!-- druid内置监控启用  -->
+	<bean id="statFilter" class="com.alibaba.druid.filter.stat.StatFilter">
+		<property name="mergeSql" value="true"/>
+		<property name="slowSqlMillis" value="3000"/>
+	</bean>
+
+	<!--数据源配置 -->
+	<bean id="abstarctDataSource" abstract="true" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+		<property name="proxyFilters"><list><ref bean="statFilter" /></list></property>
+		<property name="maxActive" value="${db.maxPoolSize}" />
+		<property name="initialSize" value="${db.initialPoolSize}" />
+		<property name="maxWait" value="${db.maxWait}" />
+		<property name="minIdle" value="${db.initialPoolSize}" />
+		<property name="timeBetweenEvictionRunsMillis" value="${db.timeBetweenEvictionRunsMillis}" />
+		<property name="minEvictableIdleTimeMillis" value="${db.minEvictableIdleTimeMillis}" />
+		<property name="validationQuery" value="SELECT 'x'" />
+		<property name="testWhileIdle" value="true" />
+		<property name="testOnBorrow" value="false" />
+		<property name="testOnReturn" value="false" />
+		<property name="poolPreparedStatements" value="true" />
+		<property name="maxPoolPreparedStatementPerConnectionSize" value="${db.maxPoolPreparedStatementPerConnectionSize}" />
+		<property name="removeAbandoned" value="true" />
+		<property name="removeAbandonedTimeout" value="1200" />
+		<property name="logAbandoned" value="true" />
+	</bean> 
+	
+	<bean id="dataSource" parent="abstarctDataSource">
+		<property name="url" value="${db.url}" />
+		<property name="username" value="${db.user}" />
+		<property name="password" value="${db.password}" />
+	</bean>     
+       
+</beans>
