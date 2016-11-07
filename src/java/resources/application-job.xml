@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"	
+	xsi:schemaLocation=" 
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context-3.0.xsd
+            http://www.springframework.org/schema/task  
+            http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+       
+        <task:scheduler id="crawjob" pool-size="10" />
+       <task:scheduled-tasks scheduler="crawjob" >
+      <!--  fixed-delay:上一个任务结束到下一个任务开始的间隔  fixed-rate:上一个任务开始到下一个任务开始的间隔 -->
+      	<task:scheduled ref="matchHistoryCraw" method="run" cron="${history.match.job.cron}" fixed-delay="100000" />
+       </task:scheduled-tasks> 
+       
+	   <bean id="matchHistoryCraw"  class="com.yisan.craw.MatchHistoryCraw" >
+	   	<property name="url" value="${url.007.data.repository}"></property>
+	   </bean>
+       
+	   <bean id="leagueCraw"  class="com.yisan.craw.LeagueCraw" init-method="run">
+	   	<property name="url" value="${url.007.data.repository}"></property>
+	   </bean>
+       
+            
+</beans>
