@@ -39,10 +39,27 @@
 		<property name="logAbandoned" value="true" />
 	</bean> 
 	
-	<bean id="dataSource" parent="abstarctDataSource">
+	<bean id="yidan_db" parent="abstarctDataSource">
 		<property name="url" value="${db.url}" />
 		<property name="username" value="${db.user}" />
 		<property name="password" value="${db.password}" />
 	</bean>     
+	
+	<bean id="yisan_dataSourceTransactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="yidan_db" />
+	</bean>
+	
+	<bean id="yisan_transactionTemplate"
+		class="org.springframework.transaction.support.TransactionTemplate">
+		<property name="transactionManager" ref="yisan_dataSourceTransactionManager" />
+	</bean>
+
+	<bean id="yisan_sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="yidan_db" />
+		<property name="configLocation" value="classpath:mybatis-config.xml" />
+		<property name="mapperLocations" value="classpath:**/mappers/**.xml" />
+	
+	</bean>
        
 </beans>

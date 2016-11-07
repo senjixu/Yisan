@@ -24,7 +24,12 @@
        <context:component-scan base-package="com.yisan" />
        
       <!--  <bean id="yx007jishi"  class="com.yx.craw.Yx007jishiAction" init-method="craw" /> -->
+       <bean id="leagueQueue" class="java.util.concurrent.LinkedBlockingQueue" />
+       <import resource="application-job.xml"/>
+       <import resource="application-db.xml"/>
        
-       <import resource="application-mybatis.xml"/>
+       <bean id="leagueHandler" class="com.yisan.handler.LeagueHandler" init-method="dealQueueLeague"></bean>
+       
+       
             
 </beans>
