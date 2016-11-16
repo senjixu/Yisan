@@ -3,18 +3,43 @@
 
 <mapper namespace="com.yisan.dao.mappers.LeagueMapper">
 
-	<insert id="saveLeague" parameterType="java.util.HashMap" >
+	<insert id="saveOrgLeague" parameterType="java.util.HashMap" >
 		insert into t_org_league (league_id,league_name,level,country,crt_time,update_time,status,type,year)
 		value (#{league_id},#{league_name},#{level},#{country},#{crt_time},#{update_time},#{status},#{type},#{year})
 	</insert>
 	
-	<insert id="batchSaveLeague" parameterType="java.util.HashMap" >
+	<insert id="batchSaveOrgLeague" parameterType="java.util.HashMap" >
 		insert into t_org_league (league_id,league_name,country,crt_time,update_time,status,type,year)
 		 
 		<foreach collection="leagues" separator=" union all  " item="league">
 			select #{league.league_id},#{league.league_name},#{league.country},now(),now(),0,#{league.type},#{league.year}
 		</foreach>
 	</insert>
+	
+	<select id="qryOraLeagueList" parameterType="hashMap" resultType="com.yisan.bean.OrgLeagueBean">
+		select league_id,type,year,league_type
+		from t_org_league
+		where status = 0
+		<if test="type != null">
+			type = #{type}
+		</if>
+		 order by league_id,year
+	</select>
+	
+	<select id="countOraLeague" parameterType="hashMap" resultType="int">
+		select count(1)
+		from t_org_league
+		where status = 0
+		<if test="type != null">
+			type = #{type}
+		</if>
+	</select>
+	
+	<update id="markOrgLeagueCrawed" parameterType="hashMap">
+		update t_org_league set update_time = now(),status = 1
+		where leauge_id = #{league_id}
+		and year = #{year}
+	</update>
 	
 	
 </mapper>

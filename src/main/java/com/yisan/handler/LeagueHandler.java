@@ -26,6 +26,7 @@ public class LeagueHandler {
 	LeagueService leagueService;
 	
 	private static final ExecutorService executor = Executors.newCachedThreadPool();
+	private static final int thread_num = 5;
 	
 	public void dealQueueLeague(){
 		
@@ -33,17 +34,13 @@ public class LeagueHandler {
 			Thread.sleep(10000);
 			log.info("准备保存原始联赛，leagueQueue.size=" + leagueQueue.size());
 			
-			for(int i=0;i<5;i++){
+			for(int i=0;i<thread_num;i++){
 				executor.execute(new Runnable(){
-					
 					public void run() {
-						
 						saveLeague();
 					}
-					
 				});
 			}
-			
 		}catch(Exception e){
 			log.error(e.getMessage(), e);
 		}finally{

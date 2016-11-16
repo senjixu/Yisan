@@ -2,23 +2,12 @@ package com.yisan.craw;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
-import java.util.ArrayList;
-import java.util.List;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-
-import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.yisan.util.HttpUtil;
 
 public abstract class AbstractService implements Runnable{
 	private static final Logger log = LoggerFactory.getLogger(AbstractService.class);
@@ -32,9 +21,7 @@ public abstract class AbstractService implements Runnable{
 		if(!isWorking()){
 			return;
 		}
-		
 		exe();
-		
 	}
 	
 	public abstract boolean isWorking();
@@ -66,16 +53,7 @@ public abstract class AbstractService implements Runnable{
 		return null;
 	}
 
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
-	
-	
+	//初始化Connection
 	protected Connection initConnection(String url) {
     	Connection conn = Jsoup.connect(url);
     	conn.header("user-agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:38.0) Gecko/20100101 Firefox/38.0");
@@ -90,6 +68,12 @@ public abstract class AbstractService implements Runnable{
         return conn;
     }
 	
+	/**
+	 * 获取url页面文本，请求失败情况下最多重复请求5次
+	 * @param url
+	 * @return
+	 * @throws IOException
+	 */
 	protected Document getContentDoc(String url) throws IOException{
 		Document doc = null;
 		int times = 0;
@@ -104,8 +88,15 @@ public abstract class AbstractService implements Runnable{
 				}
 			}
 		}
-		
 		return doc;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
 	}
 	
 }

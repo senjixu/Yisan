@@ -17,7 +17,7 @@ public class LeagueServiceImpl implements LeagueService {
 	LeagueMapper leagueMapper;
 	
 	public void batchSaveLeague(Map<String,List<LeagueBean>> param) {
-		leagueMapper.batchSaveLeague(param);
+		leagueMapper.batchSaveOrgLeague(param);
 	}
 
 }
