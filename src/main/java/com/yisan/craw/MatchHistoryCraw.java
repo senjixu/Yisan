@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.utils.DateUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -138,20 +139,34 @@ public class MatchHistoryCraw extends AbstractService{
 		//jh["R_1"] = [[37600,36,-1,'2003-08-16 19:00',32,33,'1-0','1-0','','',,,'','',0,1,0,0,0,0,''],[...]];jh["R_2"] = [[...]]
 		//轮次信息
 		String round = StringUtils.substringAfter(content, "jh[");
+		round = StringUtils.substringBefore(round, "var");
 		String[] rounds = round.split(";");
 		//round = round.replace("],[", "#");
 		String[] matchRound = null;
+		List<MatchBean> matchList = new ArrayList<MatchBean>();
+		String leagueId = "";
 		for(String r : rounds){
 			r = StringUtils.substringAfter(round, "= [[");
 			r = r.replace("],[", "#");
-			r = r.replace("]];", "");
+			r = r.replace("]];", "").replace("'", "");
 			matchRound = r.split("#");
-			
+			System.out.println(r);
 			String[] mrs = null;
  			for(String mr : matchRound){
  				mrs = mr.split(",");
+ 				leagueId = mrs[1];
  				MatchBean match = new MatchBean();
  				match.setMatch_id(mrs[0]);
+ 				match.setLeague_id(Long.valueOf(leagueId));
+ 				match.setMatch_time(DateUtils.parseDate(mrs[3]));
+ 				match.setHome_team_id(Long.valueOf(leagueId + mrs[4]));
+ 				match.setAway_team_id(Long.valueOf(leagueId + mrs[5]));
+ 				match.setHome_team_score(Integer.valueOf(StringUtils.substringAfter(mrs[6], "-")));
+ 				match.setAway_team_score(Integer.valueOf(StringUtils.substringBefore(mrs[6], "-")));
+ 				match.setHf_home_team_score(Integer.valueOf(StringUtils.substringAfter(mrs[7], "-")));
+ 				match.setHf_away_team_score(Integer.valueOf(StringUtils.substringBefore(mrs[7], "-")));
+ 				
+ 				matchList.add(match);
 			}
 		}
 		
