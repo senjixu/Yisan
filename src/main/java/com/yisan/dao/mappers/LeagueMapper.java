@@ -6,10 +6,9 @@ import java.util.Map;
 import com.yisan.bean.LeagueBean;
 import com.yisan.bean.OrgLeagueBean;
 
-public interface LeagueMapper {
+public interface LeagueMapper extends BaseMapper{
 	
 	public void saveOrgLeague(Map<String,Object> league);
-	public void batchSaveOrgLeague(Map<String,List<LeagueBean>> param);
 	public List<OrgLeagueBean> qryOraLeagueList(Map<String,Object> param);
 	
 	/**

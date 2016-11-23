@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yisan.dao.mappers.MatchMapper">
+
+	<insert id="batchSaveMatch" parameterType="java.util.HashMap" >
+		insert into t_match (
+			   match_id
+			  ,league_id
+			  ,home_team_name
+			  ,home_team_id
+			  ,away_team_name
+			  ,away_team_id
+			  ,home_team_score
+			  ,away_team_score
+			  ,match_time
+			  ,status
+			  ,status_id
+			  ,round
+			  ,hf_home_team_score
+			  ,hf_away_team_score
+			)
+		<foreach collection="matchs" separator=" union all  " item="match">
+			select  #{match.match_id},
+					#{match.league_id},
+					#{match.home_team_name},
+					#{match.home_team_id},
+					#{match.away_team_name},
+					#{match.away_team_id},
+					#{match.home_team_score},
+					#{match.away_team_score},
+					#{match.match_time},
+					0,
+					#{match.status_id},
+					#{match.round},
+					#{match.hf_home_team_score},
+					#{match.hf_away_team_score}
+			from dual
+		</foreach>
+		on duplicate key update match_id=VALUES(match_id),update_time=now()
+	</insert>
+	
+</mapper>

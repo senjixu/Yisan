@@ -14,6 +14,21 @@
  		 <property name="mapperInterface" value="com.yisan.dao.mappers.LeagueMapper" />
 		<property name="sqlSessionFactory" ref="yisan_sqlSessionFactory" />
  	</bean>
+ 	
+ 	<bean id="matchMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+ 		 <property name="mapperInterface" value="com.yisan.dao.mappers.MatchMapper" />
+		<property name="sqlSessionFactory" ref="yisan_sqlSessionFactory" />
+ 	</bean>
+ 	
+ 	<bean id="teamMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+ 		 <property name="mapperInterface" value="com.yisan.dao.mappers.TeamMapper" />
+		<property name="sqlSessionFactory" ref="yisan_sqlSessionFactory" />
+ 	</bean>
+ 	
+ 	<bean id="baseMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+ 		 <property name="mapperInterface" value="com.yisan.dao.mappers.BaseMapper" />
+		<property name="sqlSessionFactory" ref="yisan_sqlSessionFactory" />
+ 	</bean>
   
   
     

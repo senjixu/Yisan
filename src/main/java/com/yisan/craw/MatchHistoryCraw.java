@@ -1,8 +1,9 @@
 package com.yisan.craw;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.Map;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.DateUtils;
@@ -12,6 +13,7 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.yisan.bean.MatchBean;
 import com.yisan.bean.OrgLeagueBean;
@@ -27,7 +29,12 @@ public class MatchHistoryCraw extends AbstractService{
 	@Autowired
 	private LeagueMapper leagueMapper;
 	
-	private ArrayBlockingQueue<OrgLeagueBean> queue = null;
+	@Autowired
+	@Qualifier("historyMatchQueue")
+	private LinkedBlockingQueue<MatchBean> historyMatchQueue;
+	
+	@Autowired
+	private LinkedBlockingQueue<TeamBean> teamQueue;
 	
 	private String url = ConfigReader.getProperty("url.007.league");
 	
@@ -45,41 +52,69 @@ public class MatchHistoryCraw extends AbstractService{
 		
 		String detailUrl = "";
 		Document doc = null;
-		for(OrgLeagueBean bean : list){
-			detailUrl = url + bean.getLeague_type() + "/" + bean.getYear() + "/" + bean.getLeague_id() + ".html";
-			doc = getContent(detailUrl);
-			
-			if(doc == null){
-				log.warn("爬取页面{} 失败",detailUrl);
-				continue;
-			}
-			
-			if("SubLeague".equals(bean.getLeague_type())){
-				dealSubLeague(doc);
-			}else{
-				deal(doc);
-			}
-			
-			//睡眠3秒
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
+		try{
+			for(OrgLeagueBean bean : list){
+				detailUrl = url + "/cn/" + bean.getLeague_type() + "/" + bean.getYear() + "/" + bean.getLeague_id() + ".html";
+				doc = getContent(detailUrl);
 				
+				if(doc == null){
+					log.warn("爬取页面{} 失败",detailUrl);
+					continue;
+				}
+				
+				if("SubLeague".equals(bean.getLeague_type())){
+					//解析附加赛决赛
+					parse(deal(doc));
+					
+					String content = deal(doc);
+					String[] subLeagues = dealSubLeague(content);
+					if(subLeagues != null && subLeagues.length>0){
+						if(subLeagues.length>1){
+							//联赛 附加赛， 附加赛决赛在上面解析了
+							for(int i = 0;i<subLeagues.length-1;i++){
+								detailUrl = url + "/cn/" + bean.getLeague_type() + "/" + bean.getYear() + "/" + 
+										bean.getLeague_id() + "_" + subLeagues[0] +  ".html";
+								doc = getContent(detailUrl);
+								parse(deal(doc));
+							}
+						}
+					}
+				}else{
+					parse(deal(doc));
+				}
+				
+				//睡眠3秒
+				try {
+					Thread.sleep(3000);
+				} catch (InterruptedException e) {
+					
+				}
 			}
+		}catch(Exception e){
+			log.error("爬取历史赛事出错", e);
 		}
-		
 		log.info("历史赛事爬取任务结束，耗时{}毫秒",System.currentTimeMillis() - begin);
 	}
 	
 	//先去到主页，然后获取联赛、附加赛、附加赛决赛的编码，根据编码组合新的地址，再访爬取新组合的地址页面
-	private void dealSubLeague(Document doc) {
+	private String[] dealSubLeague(String content) {
+		String arrSubLeague = StringUtils.substringAfter(content, "var arrSubLeague");
 		
+		if(arrSubLeague == null){
+			return null;
+		}
 		
+		arrSubLeague = StringUtils.substringAfter(content, "[[");
+		arrSubLeague  = StringUtils.substringBefore(arrSubLeague, "]];");
+		arrSubLeague = arrSubLeague.replace("],[", "#");
+		String[] subLeagues = arrSubLeague.split("#");
+		
+		return subLeagues;
 	}
 
-	private void deal(Document doc) {
+	private String deal(Document doc) {
 		if(doc == null){
-			return;
+			return null;
 		}
 		
 		//从js里提取数据
@@ -98,18 +133,20 @@ public class MatchHistoryCraw extends AbstractService{
 						log.error("请求{}出错,页面不存在",pageUrl);
 						continue;
 					}
+					return content;
 				} catch (Exception e) {
 					log.error("请求{}出错,结果{},异常反馈{}",url+jsUrl,content,e.getMessage());
 					continue;
 				}
-				
-				parse(content);
 			}
 		}
+		return content;
 	}
 
 	protected Object parse(String content){
-		
+		if(StringUtils.isBlank(content)){
+			return null;
+		}
 		String afterArrTeam = StringUtils.substringAfter(content, "var arrTeam =");
 		String team = StringUtils.substringBefore(afterArrTeam, "jh[");
 		team = team.replace("[[", "").replace("]];", "").replace("'", "").replace("],[", "#");
@@ -118,7 +155,7 @@ public class MatchHistoryCraw extends AbstractService{
 		
 		//获取球队的信息
 		int size = 6;
-		List<TeamBean> teamList = new ArrayList<TeamBean>();
+		Map<String,String> teamNameMap = new HashMap<String,String>();
 		for(String t: teams){
 			String[] teamItem =  StringUtils.split(t,",");
 			TeamBean bean = new TeamBean();
@@ -132,8 +169,11 @@ public class MatchHistoryCraw extends AbstractService{
 				bean.setTeam_name_en(teamItem[3]);
 				bean.setTeam_name_hk_s(teamItem[4]);
 				bean.setPic(teamItem[5]);
+				
+				teamNameMap.put(teamItem[0].trim(), teamItem[1]);
+				
+				teamQueue.add(bean);
 			}
-			teamList.add(bean);
 		}
 		
 		//jh["R_1"] = [[37600,36,-1,'2003-08-16 19:00',32,33,'1-0','1-0','','',,,'','',0,1,0,0,0,0,''],[...]];jh["R_2"] = [[...]]
@@ -143,16 +183,19 @@ public class MatchHistoryCraw extends AbstractService{
 		String[] rounds = round.split(";");
 		//round = round.replace("],[", "#");
 		String[] matchRound = null;
-		List<MatchBean> matchList = new ArrayList<MatchBean>();
 		String leagueId = "";
+		int rd = 0;
 		for(String r : rounds){
 			r = StringUtils.substringAfter(round, "= [[");
 			r = r.replace("],[", "#");
 			r = r.replace("]];", "").replace("'", "");
 			matchRound = r.split("#");
-			System.out.println(r);
+			rd++;
+			
 			String[] mrs = null;
+			// [[1250439,3,0,2017-05-29 00:30,9,1068,,,,,,,,,0,1,0,0,0,0,,,#1250443,3,0,2017-05-29 00:30,1072,13,,,,,,,,,0,1,0,0,0,0,,,#1250442,3,0,2017-05-29 00:30,3100,14,,,,,,,,,0,1,0,0,0,0,,,#1250441,3,0,2017-05-29 00:30,10,8,,,,,,,,,0,1,0,0,0,0,,,#1250440,3,0,2017-05-29 00:30,12,2037,,,,,,,,,0,1,0,0,0,0,,,
  			for(String mr : matchRound){
+ 				System.out.println(mr);
  				mrs = mr.split(",");
  				leagueId = mrs[1];
  				MatchBean match = new MatchBean();
@@ -161,15 +204,28 @@ public class MatchHistoryCraw extends AbstractService{
  				match.setMatch_time(DateUtils.parseDate(mrs[3]));
  				match.setHome_team_id(Long.valueOf(leagueId + mrs[4]));
  				match.setAway_team_id(Long.valueOf(leagueId + mrs[5]));
- 				match.setHome_team_score(Integer.valueOf(StringUtils.substringAfter(mrs[6], "-")));
- 				match.setAway_team_score(Integer.valueOf(StringUtils.substringBefore(mrs[6], "-")));
- 				match.setHf_home_team_score(Integer.valueOf(StringUtils.substringAfter(mrs[7], "-")));
- 				match.setHf_away_team_score(Integer.valueOf(StringUtils.substringBefore(mrs[7], "-")));
+ 				String homeScore = StringUtils.substringAfter(mrs[6], "-");
+ 				String awayScore = StringUtils.substringBefore(mrs[6], "-");
+ 				match.setHome_team_score(StringUtils.isBlank(homeScore)?null:Integer.valueOf(homeScore));
+ 				match.setAway_team_score(StringUtils.isBlank(awayScore)?null:Integer.valueOf(awayScore));
+ 				String fh_homeScore = StringUtils.substringAfter(mrs[7], "-");
+ 				String fh_awayScore = StringUtils.substringBefore(mrs[7], "-");
+ 				match.setHf_home_team_score(StringUtils.isBlank(fh_homeScore)?null:Integer.valueOf(fh_homeScore));
+ 				match.setHf_away_team_score(StringUtils.isBlank(fh_awayScore)?null:Integer.valueOf(fh_awayScore));
+ 				match.setHome_team_name(teamNameMap.get(mrs[4]));
+ 				match.setAway_team_name(teamNameMap.get(mrs[5]));
+ 				match.setRound(rd);
+ 				//未开始
+ 				if(match.getHf_away_team_score() == null){
+ 					match.setStatusId(1);
+ 				}else{
+ 					match.setStatusId(5);
+ 				}
  				
- 				matchList.add(match);
+ 				historyMatchQueue.add(match);
 			}
 		}
-		
+		teamNameMap.clear();
 		
 		return null;
 	}

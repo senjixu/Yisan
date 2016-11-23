@@ -2,7 +2,7 @@ package com.yisan.bean;
 
 import java.util.Date;
 
-public class LeagueBean {
+public class OrgLeagueBean {
 	private long league_id;
 	private String league_name_cn;
 	private String league_name_en;
@@ -14,6 +14,7 @@ public class LeagueBean {
 	private Date update_time;
 	private int status;
 	private int type;
+	private String league_type;
 	private String year;
 	
 	
@@ -89,12 +90,20 @@ public class LeagueBean {
 	public void setYear(String year) {
 		this.year = year;
 	}
+	
+	public String getLeague_type() {
+		return league_type;
+	}
+	public void setLeague_type(String leauge_type) {
+		this.league_type = leauge_type;
+	}
 	@Override
 	public String toString() {
-		return "LeagueBean [league_id=" + league_id + ", league_name_cn=" + league_name_cn + ", league_name_en="
+		return "OrgLeagueBean [league_id=" + league_id + ", league_name_cn=" + league_name_cn + ", league_name_en="
 				+ league_name_en + ", league_name=" + league_name + ", is_hot=" + is_hot + ", level=" + level
 				+ ", country=" + country + ", crt_time=" + crt_time + ", update_time=" + update_time + ", status="
-				+ status + ", type=" + type + ", year=" + year + "]";
+				+ status + ", type=" + type + ", league_type=" + league_type + ", year=" + year + "]";
 	}
+	
 
 }
