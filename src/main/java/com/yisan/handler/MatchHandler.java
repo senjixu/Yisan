@@ -71,7 +71,7 @@ public class MatchHandler {
 				matchService.batchSaveMatch(param);
 				matchs.clear();
 			}
-		}catch(Exception e){
+		}catch(Throwable e){
 			log.error("保存赛事出错",e);
 		}
 	}

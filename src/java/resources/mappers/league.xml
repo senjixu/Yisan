@@ -37,7 +37,7 @@
 	
 	<update id="markOrgLeagueCrawed" parameterType="hashMap">
 		update t_org_league set update_time = now(),status = 1
-		where leauge_id = #{league_id}
+		where league_id = #{league_id}
 		and year = #{year}
 	</update>
 	

@@ -71,7 +71,7 @@ public class TeamHandler {
 				teamService.batchSaveTeam(param);
 				teams.clear();
 			}
-		}catch(Exception e){
+		}catch(Throwable e){
 			log.error("保存球队出错",e);
 		}
 	}
