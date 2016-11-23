@@ -20,4 +20,8 @@ public class LeagueServiceImpl implements LeagueService {
 		leagueMapper.batchSave(param);
 	}
 
+	public void markOrgLeagueCrawed(Map<String, Object> param) {
+		leagueMapper.markOrgLeagueCrawed(param);
+	}
+
 }

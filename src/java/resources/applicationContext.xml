@@ -29,10 +29,5 @@
        <bean id="teamQueue" class="java.util.concurrent.LinkedBlockingQueue" />
        <import resource="application-job.xml"/>
        <import resource="application-db.xml"/>
-       
-       <bean id="leagueHandler" class="com.yisan.handler.LeagueHandler" init-method="dealQueueLeague"></bean>
-       <bean id="matchHandler" class="com.yisan.handler.MatchHandler" init-method="dealQueueMatch" />
-       
-       
             
 </beans>

@@ -31,7 +31,6 @@ public class TeamHandler {
 	
 	public void dealQueueMatch(){
 		try{
-			Thread.sleep(10000);
 			log.info("准备保存team，teamQueue.size=" + teamQueue.size());
 			
 			for(int i=0;i<thread_num;i++){

@@ -31,7 +31,6 @@ public class MatchHandler {
 	
 	public void dealQueueMatch(){
 		try{
-			Thread.sleep(10000);
 			log.info("准备保存match，historyMatchQueue.size=" + historyMatchQueue.size());
 			
 			for(int i=0;i<thread_num;i++){

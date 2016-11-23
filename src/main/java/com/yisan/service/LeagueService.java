@@ -9,4 +9,6 @@ public interface LeagueService {
 
 	void batchSaveLeague(Map<String,List<LeagueBean>> param);
 	
+	void markOrgLeagueCrawed(Map<String,Object> param);
+	
 }

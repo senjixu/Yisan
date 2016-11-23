@@ -19,6 +19,7 @@ import com.yisan.bean.MatchBean;
 import com.yisan.bean.OrgLeagueBean;
 import com.yisan.bean.TeamBean;
 import com.yisan.dao.mappers.LeagueMapper;
+import com.yisan.service.LeagueService;
 import com.yisan.util.ConfigReader;
 import com.yisan.util.HttpUtil;
 
@@ -32,6 +33,9 @@ public class MatchHistoryCraw extends AbstractService{
 	@Autowired
 	@Qualifier("historyMatchQueue")
 	private LinkedBlockingQueue<MatchBean> historyMatchQueue;
+	
+	@Autowired
+	private LeagueService leagueService;
 	
 	@Autowired
 	private LinkedBlockingQueue<TeamBean> teamQueue;
@@ -53,6 +57,7 @@ public class MatchHistoryCraw extends AbstractService{
 		String detailUrl = "";
 		Document doc = null;
 		try{
+			Map<String,Object> leagueMap = new HashMap<String,Object>();
 			for(OrgLeagueBean bean : list){
 				detailUrl = url + "/cn/" + bean.getLeague_type() + "/" + bean.getYear() + "/" + bean.getLeague_id() + ".html";
 				doc = getContent(detailUrl);
@@ -76,6 +81,10 @@ public class MatchHistoryCraw extends AbstractService{
 										bean.getLeague_id() + "_" + subLeagues[0] +  ".html";
 								doc = getContent(detailUrl);
 								parse(deal(doc));
+								//睡眠3秒
+								try {
+									Thread.sleep(3000);
+								} catch (InterruptedException e) {}
 							}
 						}
 					}
@@ -83,12 +92,14 @@ public class MatchHistoryCraw extends AbstractService{
 					parse(deal(doc));
 				}
 				
+				leagueMap.put("league_id", bean.getLeague_id());
+				leagueMap.put("year", bean.getYear());
+				leagueService.markOrgLeagueCrawed(leagueMap);
+				
 				//睡眠3秒
 				try {
 					Thread.sleep(3000);
-				} catch (InterruptedException e) {
-					
-				}
+				} catch (InterruptedException e) {}
 			}
 		}catch(Exception e){
 			log.error("爬取历史赛事出错", e);
@@ -195,7 +206,6 @@ public class MatchHistoryCraw extends AbstractService{
 			String[] mrs = null;
 			// [[1250439,3,0,2017-05-29 00:30,9,1068,,,,,,,,,0,1,0,0,0,0,,,#1250443,3,0,2017-05-29 00:30,1072,13,,,,,,,,,0,1,0,0,0,0,,,#1250442,3,0,2017-05-29 00:30,3100,14,,,,,,,,,0,1,0,0,0,0,,,#1250441,3,0,2017-05-29 00:30,10,8,,,,,,,,,0,1,0,0,0,0,,,#1250440,3,0,2017-05-29 00:30,12,2037,,,,,,,,,0,1,0,0,0,0,,,
  			for(String mr : matchRound){
- 				System.out.println(mr);
  				mrs = mr.split(",");
  				leagueId = mrs[1];
  				MatchBean match = new MatchBean();
