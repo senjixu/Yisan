@@ -8,7 +8,7 @@
 		value (#{league_id},#{league_name},#{level},#{country},#{crt_time},#{update_time},#{status},#{type},#{year})
 	</insert>
 	
-	<insert id="batchSaveOrgLeague" parameterType="java.util.HashMap" >
+	<insert id="batchSave" parameterType="java.util.HashMap" >
 		insert into t_org_league (league_id,league_name,country,crt_time,update_time,status,type,year)
 		 
 		<foreach collection="leagues" separator=" union all  " item="league">

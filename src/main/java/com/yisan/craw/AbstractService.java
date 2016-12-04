@@ -9,7 +9,7 @@ import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractService implements Runnable{
+public abstract class AbstractService{
 	private static final Logger log = LoggerFactory.getLogger(AbstractService.class);
 	
 	protected String url = "";
@@ -33,17 +33,26 @@ public abstract class AbstractService implements Runnable{
 	}
 	
 	protected Document getContent(String url) {
+		log.info("爬取地址:{}",url);
 		Document doc = null;
 		try {
 			doc = Jsoup.connect(url).get();
 		}catch(SocketTimeoutException se){
 			try {
 				doc = Jsoup.connect(url).timeout(10000).get();
+				return doc;
 			} catch (IOException e) {
 				log.error("重试爬取出错,url={}", url,e);
 			}
 		}catch (Exception e) {
 			log.error("爬取出错,url={}", url,e);
+			try {
+				Thread.sleep(5000);
+				doc = Jsoup.connect(url).timeout(10000).get();
+				return doc;
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
 		}
 		return doc;
 	}

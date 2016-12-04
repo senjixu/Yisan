@@ -83,4 +83,12 @@ public class TeamBean {
 	public void setUpdate_time(Date update_time) {
 		this.update_time = update_time;
 	}
+	@Override
+	public String toString() {
+		return "TeamBean [team_id=" + team_id + ", team_name=" + team_name + ", team_name_hk=" + team_name_hk
+				+ ", team_name_hk_s=" + team_name_hk_s + ", team_name_en=" + team_name_en + ", status=" + status
+				+ ", rank=" + rank + ", country=" + country + ", pic=" + pic + ", crt_time=" + crt_time
+				+ ", update_time=" + update_time + "]";
+	}
+	
 }

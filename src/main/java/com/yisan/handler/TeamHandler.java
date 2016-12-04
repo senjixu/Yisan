@@ -29,21 +29,22 @@ public class TeamHandler {
 	private static final ExecutorService executor = Executors.newCachedThreadPool();
 	private static final int thread_num = 5;
 	
-	public void dealQueueMatch(){
+	public void dealQueueTeam(){
 		try{
 			log.info("准备保存team，teamQueue.size=" + teamQueue.size());
-			
-			for(int i=0;i<thread_num;i++){
-				executor.execute(new Runnable(){
-					public void run() {
-						saveTeam();
-					}
-				});
+			if(!teamQueue.isEmpty()){
+				for(int i=0;i<thread_num;i++){
+					executor.execute(new Runnable(){
+						public void run() {
+							saveTeam();
+						}
+					});
+				}
 			}
 		}catch(Exception e){
 			log.error(e.getMessage(), e);
 		}finally{
-			executor.shutdown();
+			//executor.shutdown();
 		}
 		
 		log.info("保存球队工作结束");
@@ -62,16 +63,36 @@ public class TeamHandler {
 				}
 				if(teams.size()>=50){
 					param.put("teams", teams);
-					teamService.batchSaveTeam(param);
+					synchronized (this) {
+						teamService.batchSaveTeam(param);
+					}
 					teams.clear();
 				}
 			}
 			if(teams.size()>0){
 				param.put("teams", teams);
-				teamService.batchSaveTeam(param);
+				synchronized (this) {
+					teamService.batchSaveTeam(param);
+				}
 				teams.clear();
 			}
 		}catch(Throwable e){
+			Map<String,Object> m = new HashMap<String,Object>();
+			synchronized (this) {
+				for(TeamBean t : teams){
+					m.put("team", t);
+					
+					try{
+						teamService.saveTeam(m);
+					}catch(Throwable e1){
+						log.error("保存球队出错,team={}",t);
+						log.error("保存球队出错",e1);
+						continue;
+					}
+				}
+			}
+			
+			
 			log.error("保存球队出错",e);
 		}
 	}

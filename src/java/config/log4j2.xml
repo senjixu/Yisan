@@ -60,7 +60,7 @@
 	</Appenders>
 
 	<Loggers>
-		<logger name="com.yx" level="debug"/>
+		<logger name="com.yx" level="trace"/>
 		<Root level="info">
 			<AppenderRef ref="Console" />
 			<AppenderRef ref="info_file" />

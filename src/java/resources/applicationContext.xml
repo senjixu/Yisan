@@ -27,6 +27,7 @@
        <bean id="leagueQueue" class="java.util.concurrent.LinkedBlockingQueue" />
        <bean id="historyMatchQueue" class="java.util.concurrent.LinkedBlockingQueue" />
        <bean id="teamQueue" class="java.util.concurrent.LinkedBlockingQueue" />
+       
        <import resource="application-job.xml"/>
        <import resource="application-db.xml"/>
             

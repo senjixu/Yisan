@@ -3,7 +3,7 @@
 
 <mapper namespace="com.yisan.dao.mappers.MatchMapper">
 
-	<insert id="batchSaveMatch" parameterType="java.util.HashMap" >
+	<insert id="batchSave" parameterType="java.util.HashMap" >
 		insert into t_match (
 			   match_id
 			  ,league_id
@@ -37,6 +37,42 @@
 					#{match.hf_away_team_score}
 			from dual
 		</foreach>
+		on duplicate key update match_id=VALUES(match_id),update_time=now()
+	</insert>
+	
+	<insert id="save" parameterType="java.util.HashMap" >
+		insert into t_match (
+			   match_id
+			  ,league_id
+			  ,home_team_name
+			  ,home_team_id
+			  ,away_team_name
+			  ,away_team_id
+			  ,home_team_score
+			  ,away_team_score
+			  ,match_time
+			  ,status
+			  ,status_id
+			  ,round
+			  ,hf_home_team_score
+			  ,hf_away_team_score
+			)
+		values(
+			 		#{match_id},
+					#{league_id},
+					#{home_team_name},
+					#{home_team_id},
+					#{away_team_name},
+					#{away_team_id},
+					#{home_team_score},
+					#{away_team_score},
+					#{match_time},
+					0,
+					#{status_id},
+					#{round},
+					#{hf_home_team_score},
+					#{hf_away_team_score}
+			)
 		on duplicate key update match_id=VALUES(match_id),update_time=now()
 	</insert>
 	

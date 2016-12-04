@@ -8,5 +8,7 @@ import com.yisan.bean.TeamBean;
 public interface TeamService {
 
 	void batchSaveTeam(Map<String,List<TeamBean>> param);
+
+	void saveTeam(Map<String, Object> m);
 	
 }

@@ -11,23 +11,21 @@
             http://www.springframework.org/schema/task  
             http://www.springframework.org/schema/task/spring-task-3.0.xsd">
        
-        <task:scheduler id="crawjob" pool-size="10" />
-       <task:scheduled-tasks scheduler="crawjob" >
        <!-- fixed-delay:上一个任务结束到下一个任务开始的间隔  fixed-rate:上一个任务开始到下一个任务开始的间隔 -->
-      	<task:scheduled ref="matchHandler" method="dealQueueMatch" cron="${history.match.job.cron}" fixed-delay="10000" />
-      	<task:scheduled ref="teamHandler" method="dealQueueMatch" cron="${team.job.cron}" fixed-delay="10000" />
-      	
+        <task:scheduler id="crawjob" pool-size="3"  />
+	    <task:scheduled-tasks scheduler="crawjob" >
+	      	  <task:scheduled ref="matchHandler" method="dealQueueMatch" cron="${history.match.job.cron}" />
+	      	<task:scheduled ref="teamHandler" method="dealQueueTeam" cron="${team.job.cron}"  />
+	      	<task:scheduled ref="matchHistoryCraw" method="run" cron="${history.match.job.cron}" fixed-delay="10000" />
        </task:scheduled-tasks> 
        
-	  <bean id="matchHistoryCraw"  class="com.yisan.craw.MatchHistoryCraw" init-method="run" />
-       
-	  <!--  <bean id="leagueCraw"  class="com.yisan.craw.LeagueCraw" >
-	   	<property name="url" value="${url.007.data.repository}"></property>
-	   </bean> -->
-	   
-	   <bean id="leagueHandler" class="com.yisan.handler.LeagueHandler" init-method="dealQueueLeague" />
+	   <bean id="leagueHandler" class="com.yisan.handler.LeagueHandler"  />
        <bean id="matchHandler" class="com.yisan.handler.MatchHandler"  />
        <bean id="teamHandler" class="com.yisan.handler.TeamHandler"  />
        
+        <bean id="matchHistoryCraw"  class="com.yisan.craw.MatchHistoryCraw" />
             
+	  <!--  <bean id="leagueCraw"  class="com.yisan.craw.LeagueCraw" >
+	   	<property name="url" value="${url.007.data.repository}"></property>
+	   </bean> -->
 </beans>

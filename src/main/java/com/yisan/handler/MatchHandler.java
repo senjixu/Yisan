@@ -27,26 +27,30 @@ public class MatchHandler {
 	MatchService matchService;
 	
 	private static final ExecutorService executor = Executors.newCachedThreadPool();
-	private static final int thread_num = 5;
+	private static final int thread_num = 6;
 	
 	public void dealQueueMatch(){
+		long begin = System.currentTimeMillis();
 		try{
-			log.info("准备保存match，historyMatchQueue.size=" + historyMatchQueue.size());
 			
-			for(int i=0;i<thread_num;i++){
-				executor.execute(new Runnable(){
-					public void run() {
-						saveMatch();
-					}
-				});
+			log.info("准备保存match,赛事队列长度是=" + historyMatchQueue.size());
+			if(!historyMatchQueue.isEmpty()){
+				for(int i=0;i<thread_num;i++){
+					executor.execute(new Runnable(){
+						public void run() {
+							saveMatch();
+						}
+					});
+				}
+				
 			}
 		}catch(Exception e){
 			log.error(e.getMessage(), e);
 		}finally{
-			executor.shutdown();
+			//executor.shutdown();
 		}
 		
-		log.info("保存原始联赛工作结束");
+		log.info("保存历史赛事任务结束,耗时:{}毫秒",System.currentTimeMillis()-begin);
 	}
 
 	protected void saveMatch() {
@@ -62,16 +66,36 @@ public class MatchHandler {
 				}
 				if(matchs.size()>=100){
 					param.put("matchs", matchs);
-					matchService.batchSaveMatch(param);
-					matchs.clear();
+					synchronized (this) {
+						matchService.batchSaveMatch(param);
+						matchs.clear();
+					}
+					
 				}
 			}
 			if(matchs.size()>0){
 				param.put("matchs", matchs);
-				matchService.batchSaveMatch(param);
-				matchs.clear();
+				synchronized (this) {
+					matchService.batchSaveMatch(param);
+					matchs.clear();
+				}
 			}
 		}catch(Throwable e){
+				synchronized (this){
+					Map<String,Object> m = new HashMap<String,Object>();
+					for(MatchBean ma : matchs){
+						try{
+							m.put("match", ma);
+							matchService.saveMatch(m);
+						}catch(Throwable e1){
+							log.error("保存赛事出错,match={}",ma);
+							log.error("保存赛事出错",e1);
+							continue;
+						}
+					}
+				}
+				matchs.clear();
+			
 			log.error("保存赛事出错",e);
 		}
 	}

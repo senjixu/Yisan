@@ -20,4 +20,8 @@ public class MatchServiceImpl implements MatchService {
 		matchMapper.batchSave(param);
 	}
 
+	public void saveMatch(Map<String, Object> param) {
+		matchMapper.save(param);
+	}
+
 }

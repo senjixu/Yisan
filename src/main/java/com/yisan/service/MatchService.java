@@ -8,5 +8,6 @@ import com.yisan.bean.MatchBean;
 public interface MatchService {
 
 	void batchSaveMatch(Map<String,List<MatchBean>> param);
+	void saveMatch(Map<String,Object> param);
 	
 }

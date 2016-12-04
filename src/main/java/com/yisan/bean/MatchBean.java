@@ -20,7 +20,6 @@ public class MatchBean {
 	private int round;
 	private Integer hf_home_team_score;
 	private Integer hf_away_team_score;
-
 	public String getMatch_id() {
 		return match_id;
 	}
@@ -93,16 +92,22 @@ public class MatchBean {
 	public void setStatus(Integer status) {
 		this.status = status;
 	}
+	public Integer getStatusId() {
+		return statusId;
+	}
+	public void setStatusId(Integer statusId) {
+		this.statusId = statusId;
+	}
 	public String getLeague_name() {
 		return league_name;
 	}
 	public void setLeague_name(String league_name) {
 		this.league_name = league_name;
 	}
-	public Integer getRound() {
+	public int getRound() {
 		return round;
 	}
-	public void setRound(Integer round) {
+	public void setRound(int round) {
 		this.round = round;
 	}
 	public Integer getHf_home_team_score() {
@@ -117,11 +122,15 @@ public class MatchBean {
 	public void setHf_away_team_score(Integer hf_away_team_score) {
 		this.hf_away_team_score = hf_away_team_score;
 	}
-	public Integer getStatusId() {
-		return statusId;
+	@Override
+	public String toString() {
+		return "MatchBean [match_id=" + match_id + ", league_id=" + league_id + ", home_team_name=" + home_team_name
+				+ ", home_team_id=" + home_team_id + ", away_team_name=" + away_team_name + ", away_team_id="
+				+ away_team_id + ", home_team_score=" + home_team_score + ", away_team_score=" + away_team_score
+				+ ", match_time=" + match_time + ", crt_time=" + crt_time + ", update_time=" + update_time + ", status="
+				+ status + ", statusId=" + statusId + ", league_name=" + league_name + ", round=" + round
+				+ ", hf_home_team_score=" + hf_home_team_score + ", hf_away_team_score=" + hf_away_team_score + "]";
 	}
-	public void setStatusId(Integer statusId) {
-		this.statusId = statusId;
-	}
+
 
 }

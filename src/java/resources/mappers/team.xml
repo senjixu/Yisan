@@ -1,31 +1,51 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.yisan.dao.mappers.MatchMapper">
+<mapper namespace="com.yisan.dao.mappers.TeamMapper">
 
-	<insert id="batchSaveTeam" parameterType="java.util.HashMap" >
-		insert into t_match (
-			   id
+	<insert id="batchSave" parameterType="java.util.HashMap" >
+		insert into t_team (
+			   team_id
 			  ,team_name
 			  ,team_name_hk
-			  ,team_name_hk_s
+			 <!--  ,team_name_hk_s -->
 			  ,team_name_en
 			  ,country
 			  ,pic
 			)
 		<foreach collection="teams" separator=" union all  " item="team">
 			select  
-					#{team.id},
+					#{team.team_id},
 					#{team.team_name},
 					#{team.team_name_hk},
-					#{team.team_name_hk_s},
+					<!-- #{team.team_name_hk_s}, -->
 					#{team.team_name_en},
 					#{team.country},
 					#{team.pic}
 					
 			from dual
 		</foreach>
-		on duplicate key update match_id=VALUES(match_id),update_time=now()
+		 on duplicate key update team_id=VALUES(team_id),update_time=now()
+	</insert>
+	
+	<insert id="save" parameterType="java.util.HashMap" >
+		insert into t_team (
+			   team_id
+			  ,team_name
+			  ,team_name_hk
+			  ,team_name_en
+			  ,country
+			  ,pic
+			)
+		values(
+					#{team_id},
+					#{team_name},
+					#{team_name_hk},
+					#{team_name_en},
+					#{country},
+					#{pic}
+			)
+		 on duplicate key update team_id=VALUES(team_id),update_time=now()
 	</insert>
 	
 </mapper>
